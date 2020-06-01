@@ -3,32 +3,48 @@ import axios from 'axios';
 import './NuGet.css';
 
 export class NuGet extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { pkg: null , response: null};
-    }
-
-    handleChange(event) {
+    state = { pkg: '' , version: ''};
+   
+    handleChange = (event) => {
+        console.log(event.target.value)
         this.setState({
-            package: event.target.value
+            pkg: event.target.value
         });
     }
 
-    handleClick() {
-        // axios.get("localhost:5000/api/nuget/Lion.Core/majorcal").then((feedback)=>{this.setState({response: "feedback"})});
-        // this.setState({response: "feedback"});
+    handleClick = () => {
+        axios.get("http://127.0.0.1:5000/api/nuget/Lion.Core/major", {PORT: 5000})
+        .then(res => res.json()).then(result => {
+            console.log(result);
+            this.setState({version: 'feedback'});
+
+        }, error => {
+            console.log(error);
+            this.setState({version: 'non feedback'});
+        })
+       
+        // fetch('http:localhost:5000/api/nuget/Lion.Core/major')
+        // .then(res => res.json()).then(result => {
+        //     console.log(result);
+        //     this.setState({version: 'feedback'});
+
+        // }, error => {
+        //     console.log(error);
+        //     this.setState({version: 'non feedback'});
+        // })
     }
 
   
     render() {
-        const  { pkg, response } = this.state;
+        const  { pkg, version } = this.state;
 
         return (<div>
             <label>Input Package?</label>
             <hr></hr>
-            <input type="text" value={pkg} onChange={this.handleClick}></input>
-            <button click={this.handleClick}>Ask!</button>
-            <h6>{response}</h6>
+            <input type="text" value={pkg} onChange={this.handleChange}></input>
+            <button onClick={this.handleClick}>Ask!</button>
+            <h6>version:  {version}</h6>
+            <h6>package:  {pkg}</h6>
         </div>);
     }
 }
