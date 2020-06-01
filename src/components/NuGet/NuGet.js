@@ -1,51 +1,47 @@
+import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
-import axios from 'axios';
 import './NuGet.css';
 
 export class NuGet extends React.Component {
-    state = { pkg: '' , version: ''};
+    state = { pkg: '' , version: '', type: ''};
    
-    handleChange = (event) => {
-        console.log(event.target.value)
-        this.setState({
-            pkg: event.target.value
-        });
+    constructor(props) {
+        super(props)
+        this.state.pkg = props.package;
+        this.state.type = props.versionType;
+        console.log("--------------------");
+        console.log(this.props.pkg);
+        console.log("--------------------");
     }
+    componentDidUpdate(prevProps) {
+        if (this.props.package !== prevProps.package || this.props.versionType !== prevProps.versionType) {
+            this.setState({
+                pkg: this.props.package,
+                type: this.props.versionType
+            });
+            const mainURL = 'http://localhost:5000/';
+            const midURL = 'api/nuget/';
+            const suffixURL = '/json';
+            const queryURL = mainURL + midURL + this.state.pkg + '/' + this.state.type +  suffixURL;
 
-    handleClick = () => {
-        axios.get("http://127.0.0.1:5000/api/nuget/Lion.Core/major", {PORT: 5000})
-        .then(res => res.json()).then(result => {
-            console.log(result);
-            this.setState({version: 'feedback'});
+            fetch(queryURL)
+                .then(res => res.json()).then(result => {
+                console.log(result);
+                this.setState({version: 'Next version: '+result[2][0]+' . ' +
+                        result[2][1]+' . '+result[2][2]+' based '+this.state.type});
 
-        }, error => {
-            console.log(error);
-            this.setState({version: 'non feedback'});
-        })
-       
-        // fetch('http:localhost:5000/api/nuget/Lion.Core/major')
-        // .then(res => res.json()).then(result => {
-        //     console.log(result);
-        //     this.setState({version: 'feedback'});
-
-        // }, error => {
-        //     console.log(error);
-        //     this.setState({version: 'non feedback'});
-        // })
+            }, error => {
+                console.log(error);
+                this.setState({version: 'No feedback!'});
+            })
+        }
     }
-
-  
     render() {
-        const  { pkg, version } = this.state;
+        const  { version } = this.state;
 
         return (<div>
-            <label>Input Package?</label>
-            <hr></hr>
-            <input type="text" value={pkg} onChange={this.handleChange}></input>
-            <button onClick={this.handleClick}>Ask!</button>
-            <h6>version:  {version}</h6>
-            <h6>package:  {pkg}</h6>
-        </div>);
+                    <p>{version}</p>
+                </div>);
     }
 }
 
