@@ -8,19 +8,19 @@ import React from 'react';
 import NuGet from '../NuGet/NuGet'
 
 class DisplayPanel extends React.Component {
-    state = {mainURL: 'http://localhost:5000/', version: '-. - . - ', searchField: '', pkg: '',type: '', major: false,
+    state = {mainURL: 'https://query-on-nuget.herokuapp.com/', version: '-. - . - ', searchField: '', pkg: '',type: '', major: false,
         minor: false, patch: false, error: null}
 
     handleSearch = () => {
         this.setState((state) => {
             const {mainURL, pkg, type} = state;
-            const midURL = 'api/nuget/';
+            const midURL = '/api/';
             const suffixURL = '/json';
             const queryURL = mainURL + midURL + pkg + '/' + type +  suffixURL;
             fetch(queryURL)
                 .then(res => res.json()).then(result => {
-                    console.log("--fetch "+''.concat(result[2][0], ' . ', result[2][1], ' . ', result[2][2]));
-                    this.setState({version: ''.concat(result[2][0], ' . ', result[2][1], ' . ', result[2][2])}); // This works strangely!!
+                    console.log("--fetch "+''.concat(result[0], ' . ', result[1], ' . ', result[2]));
+                    this.setState({version: ''.concat(result[0], ' . ', result[1], ' . ', result[2])}); // This works strangely!!
                     // return ({version: ''.concat(result[2][0], ' . ', result[2][1], ' . ', result[2][2])}); // this did not work!!!
             }, error => {
                     this.setState({version: 'no feedback!'}); // This works strangely!!
