@@ -1,32 +1,35 @@
-/*
-****************   Please check lines 23-27   **********************************
- */
-
-
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
-import NuGet from '../NuGet/NuGet'
+import NuGet from '../NuGet/NuGet';
 
 class DisplayPanel extends React.Component {
-    state = {mainURL: 'https://query-on-nuget.herokuapp.com/', version: '-. - . - ', searchField: '', pkg: '',type: '', major: false,
-        minor: false, patch: false, error: null}
+
+    state = {
+        mainURL: 'https://query-on-nuget.herokuapp.com/',
+        version: '-. - . - ',
+        searchField: '',
+        pkg: '',
+        type: '',
+        major: false,
+        minor: false,
+        patch: false,
+        suggestionList: [],
+    };
+
+
 
     handleSearch = () => {
         this.setState((state) => {
             const {mainURL, pkg, type} = state;
-            const midURL = '/api/';
+            const midURL = '/api/version/';
             const suffixURL = '/json';
-            const queryURL = mainURL + midURL + pkg + '/' + type +  suffixURL;
-            fetch(queryURL)
+            const versionURL = mainURL + midURL + pkg + '/' + type +  suffixURL;
+            fetch(versionURL)
                 .then(res => res.json()).then(result => {
-                    console.log("--fetch "+''.concat(result[0], ' . ', result[1], ' . ', result[2]));
-                    this.setState({version: ''.concat(result[0], ' . ', result[1], ' . ', result[2])}); // This works strangely!!
-                    // return ({version: ''.concat(result[2][0], ' . ', result[2][1], ' . ', result[2][2])}); // this did not work!!!
+                    this.setState({version: ''.concat(result[0], ' . ', result[1], ' . ', result[2])});
             }, error => {
-                    this.setState({version: 'no feedback!'}); // This works strangely!!
-                // return ({version: 'No feedback!'}); // this did not work!!!
+                    this.setState({version: 'no feedback!'});
             });
-            console.log("--state "+this.state.version);
         });
     }
 
@@ -39,10 +42,24 @@ class DisplayPanel extends React.Component {
     handleSearchInput = (e) => {
         this.setState({searchField: e.target.value});
         this.setState({type: 'patch', major: false, minor: false, patch: true});
-    }
+        this.setState((state) => {
+            const {mainURL, searchField} = state;
+            const midURL = 'api/query/';
+            const suffixURL = '/json';
+            const queryURL = mainURL + midURL + searchField + suffixURL;
+            fetch(queryURL)
+                .then(res => res.json()).then(result => {
+                this.setState({suggestionList: result});
+            }, error => {
+                this.setState({suggestionList: []});
+            });
+        });
+        console.log("------->");
+        console.log(this.state.suggestionList);
+    };
 
     render() {
-        const {version, pkg, type, major, minor, patch, error} = this.state;
+        const {version, pkg, type, major, minor, patch} = this.state;
         let title;
         if (pkg === '') {
             title = <h5>Please input a Package name for searching.</h5>;
@@ -53,11 +70,16 @@ class DisplayPanel extends React.Component {
 
         return (<div>
                     <form action="">
-                        <div className="form-row">
+                        <div className="form-row" >
                             <div className="form-group col-md-6">
-                                <label htmlFor=""><h3>Search for packages on Nuget.org</h3></label>
+                                <label htmlFor="" ><h3>Search for packages on NuGet.org</h3></label>
                                 <hr/>
-                                <input type="text" className="form-control" placeholder="package" onChange={this.handleSearchInput}/>
+                                <input type="text"   className = 'form-control'  placeholder="package" onChange={this.handleSearchInput}/>
+                                {this.state.suggestionList.map(item => (
+                                    <ui>
+                                        <li>{item}</li>
+                                    </ui>
+                                ))}
                                 <br/>
                                 <button type='submit' className="btn btn-secondary btn-group-sm" onClick={this.handleSearchButton}>
                                     Search
