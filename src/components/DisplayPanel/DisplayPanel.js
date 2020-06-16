@@ -14,6 +14,8 @@ class DisplayPanel extends React.Component {
         minor: false,
         patch: false,
         suggestionList: [],
+        suggestionSize: 0,
+        hiddenSuggestion : true
     };
 
 
@@ -42,6 +44,9 @@ class DisplayPanel extends React.Component {
     handleSearchInput = (e) => {
         this.setState({searchField: e.target.value});
         this.setState({type: 'patch', major: false, minor: false, patch: true});
+        if (e.target.value.length === 0) {
+            this.setState({hiddenSuggestion: true});
+        }
         this.setState((state) => {
             const {mainURL, searchField} = state;
             const midURL = 'api/query/';
@@ -49,14 +54,13 @@ class DisplayPanel extends React.Component {
             const queryURL = mainURL + midURL + searchField + suffixURL;
             fetch(queryURL)
                 .then(res => res.json()).then(result => {
-                this.setState({suggestionList: result});
+                this.setState({suggestionList: result, suggestionSize: result.length/3, hiddenSuggestion: false});
             }, error => {
                 this.setState({suggestionList: []});
             });
         });
-        console.log("------->");
-        console.log(this.state.suggestionList);
     };
+
 
     render() {
         const {version, pkg, type, major, minor, patch} = this.state;
@@ -74,18 +78,26 @@ class DisplayPanel extends React.Component {
                             <div className="form-group col-md-6">
                                 <label htmlFor="" ><h3>Search for packages on NuGet.org</h3></label>
                                 <hr/>
-                                <input type="text"   className = 'form-control'  placeholder="package" onChange={this.handleSearchInput}/>
-                                {this.state.suggestionList.map(item => (
-                                    <ui>
-                                        <li>{item}</li>
-                                    </ui>
-                                ))}
+                                <input type="text"   className = 'form-control'  value={this.state.searchField} placeholder="Search package..." onChange={this.handleSearchInput}/>
+                                <select className="mdb-select md-form"
+                                        hidden={this.state.hiddenSuggestion}
+                                        style={{'width': "inherit"}}
+                                        size={this.state.suggestionSize} onFocus={!this.state.hiddenSuggestion}>
+                                    {/*<option value={""} disabled selected>Available packages...</option>*/}
+                                    {
+                                        this.state.suggestionList.map(item => (
+                                            <option value={item} onClick={() => {this.setState({searchField: item})}} onDoubleClick={() => this.setState({hiddenSuggestion: true})}>{item}</option>
+                                        ))
+                                    }
+                                </select>
+                                <br/>
                                 <br/>
                                 <button type='submit' className="btn btn-secondary btn-group-sm" onClick={this.handleSearchButton}>
                                     Search
                                 </button>
                             </div>
                         </div>
+
                         <hr/>
                         <label htmlFor=""><em>Based on what type of version:</em></label>
                         <div className="btn-toolbar">
