@@ -15,7 +15,7 @@ class DisplayPanel extends React.Component {
         patch: false,
         suggestionList: [],
         suggestionSize: 0,
-        hiddenSuggestion : true
+        hiddenSuggestion : true,
     };
 
 
@@ -45,7 +45,7 @@ class DisplayPanel extends React.Component {
         this.setState({searchField: e.target.value});
         this.setState({type: 'patch', major: false, minor: false, patch: true});
         if (e.target.value.length === 0) {
-            this.setState({hiddenSuggestion: true});
+            this.setState({hiddenSuggestion: true, focusedSuggestion: true});
         }
         this.setState((state) => {
             const {mainURL, searchField} = state;
@@ -61,10 +61,31 @@ class DisplayPanel extends React.Component {
         });
     };
 
+    handleEnterStroke = (e, item) => {
+        e.preventDefault();
+            if (e.charCode === 13 || e.keyCode === 13) {
+                this.setState({searchField: item, hiddenSuggestion: true});
+            }
+        }
+
 
     render() {
-        const {version, pkg, type, major, minor, patch} = this.state;
+        const {version,
+            pkg,
+            type,
+            major,
+            minor,
+            patch,
+            searchField,
+            suggestionList,
+            suggestionSize,
+            hiddenSuggestion} = this.state;
+        const {handleEnterStroke,
+            handleSearchInput,
+            handleSearchButton,
+            handleSearch} = this;
         let title;
+        let firstIdOfItems = 0;
         if (pkg === '') {
             title = <h5>Please input a Package name for searching.</h5>;
         }
@@ -73,26 +94,30 @@ class DisplayPanel extends React.Component {
         }
 
         return (<div>
-                    <form action="">
+                    <form >
                         <div className="form-row" >
                             <div className="form-group col-md-6">
                                 <label htmlFor="" ><h3>Search for packages on NuGet.org</h3></label>
                                 <hr/>
-                                <input type="text"   className = 'form-control'  value={this.state.searchField} placeholder="Search package..." onChange={this.handleSearchInput}/>
-                                <select className="mdb-select md-form"
-                                        hidden={this.state.hiddenSuggestion}
+                                <input type="text"  className = 'form-control'  value={searchField} placeholder="Search package..." onChange={handleSearchInput}/>
+                                <select className="btn-secondary"
+                                        hidden={hiddenSuggestion}
                                         style={{'width': "inherit"}}
-                                        size={this.state.suggestionSize} onFocus={!this.state.hiddenSuggestion}>
+                                        size={suggestionSize}>
                                     {/*<option value={""} disabled selected>Available packages...</option>*/}
                                     {
-                                        this.state.suggestionList.map(item => (
-                                            <option value={item} onSelect={() => {this.setState({searchField: item})}} onClick={() => {this.setState({searchField: item})}} onDoubleClick={() => this.setState({hiddenSuggestion: true})}>{item}</option>
+                                        suggestionList.map(item => (
+                                            <option key={firstIdOfItems++}
+                                                    value={item}
+                                                    onClick={() => {this.setState({searchField: item})}}
+                                                    onDoubleClick={() => this.setState({hiddenSuggestion: true})}
+                                                    onKeyPress={(e) => handleEnterStroke(e, item)}>{item}</option>
                                         ))
                                     }
                                 </select>
                                 <br/>
                                 <br/>
-                                <button type='submit' className="btn btn-secondary btn-group-sm" onClick={this.handleSearchButton}>
+                                <button type='submit' className="btn btn-secondary btn-group-sm" onClick={handleSearchButton}>
                                     Search
                                 </button>
                             </div>
@@ -106,21 +131,21 @@ class DisplayPanel extends React.Component {
                                     <input className="form-check-input" type="radio" id="major"
                                            onChange={(e)=>{
                                                this.setState({type: 'major', major: true, minor: false, patch: false});
-                                               this.handleSearch();}} value='major' checked={major}/>
+                                               handleSearch();}} value='major' checked={major}/>
                                     <label htmlFor="major" className="form-check-label">Major</label>
                                 </div>
                                 <div className="form-check">
                                     <input className="form-check-input" type="radio" id="minor"
                                            onChange={(e)=>{
                                                this.setState({type: 'minor', major: false, minor: true, patch: false});
-                                               this.handleSearch();}} name={type} value='minor' checked={minor}/>
+                                               handleSearch();}} name={type} value='minor' checked={minor}/>
                                     <label htmlFor="minor" className="form-check-label">Minor</label>
                                 </div>
                                 <div className="form-check">
                                     <input className="form-check-input" type="radio" id="patch"
                                            onChange={(e)=>{
                                                this.setState({type: 'patch', major: false, minor: false, patch: true});
-                                               this.handleSearch();}} name={type} value='patch' checked={patch}/>
+                                               handleSearch();}} name={type} value='patch' checked={patch}/>
                                     <label htmlFor="patch" className="form-check-label">Patch</label>
                                 </div>
                             </div>
