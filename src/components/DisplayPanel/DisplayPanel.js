@@ -86,7 +86,7 @@ class DisplayPanel extends React.Component {
                                     {/*<option value={""} disabled selected>Available packages...</option>*/}
                                     {
                                         this.state.suggestionList.map(item => (
-                                            <option value={item} onClick={() => {this.setState({searchField: item})}} onDoubleClick={() => this.setState({hiddenSuggestion: true})}>{item}</option>
+                                            <option value={item} onSelect={() => {this.setState({searchField: item})}} onClick={() => {this.setState({searchField: item})}} onDoubleClick={() => this.setState({hiddenSuggestion: true})}>{item}</option>
                                         ))
                                     }
                                 </select>
